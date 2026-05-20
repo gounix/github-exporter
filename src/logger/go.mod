@@ -1,0 +1,3 @@
+module github-exporter/logger
+
+go 1.22.2
