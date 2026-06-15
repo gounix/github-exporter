@@ -32,9 +32,18 @@ Another approach would be to use external-secrets in combination with Vault, as 
 The following metrics are available:
 | Metric | description |
 | -------- | -------- |
-| `github_repo_stats` | This metric has the `stat` attribute with the following values
-`branches`, `closed_issues`, `closed_pull_requests`, `commits`, `contributors`, `forks_count`, `network_count`, `open_issues`, `open_pull_requests`, `stargazers_count`, `subscribers_count`, `unassigned_issues`, `unassigned_pull_requests`, `watchers_count`
+| `github_repo_stats` | This metric has the `stat` attribute with the following values: `branches`, `closed_issues`, `closed_pull_requests`, `commits`, `contributors`, `forks_count`, `network_count`, `open_issues`, `open_pull_requests`, `stargazers_count`, `subscribers_count`, `unassigned_issues`, `unassigned_pull_requests`, `watchers_count`
 | `github_clones` and `github_views` | both metrics have the `unique` label to differentiate between all or unique entries. |
 
 # Grafana dashboard
-A grafana dashboard is available in the grafana directory.
+[github](https://github.com/gounix/github-exporter/tree/main/helm-charts)
+
+# Helm chart
+[github](https://github.com/gounix/github-exporter/tree/main/helm-charts)
+
+# Sources
+[github](https://github.com/gounix/github-exporter/tree/main/src)
+
+# Container
+[docker hub](https://hub.docker.com/r/gounix/github-exporter)
+
