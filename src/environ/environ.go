@@ -44,7 +44,9 @@ func Load() error {
                 logger.Error("github-exporter/environ", "env.Load", err)
 		os.Exit(1)
         }
-	logger.Info("github-exporter.environ loaded environment", "TOKEN(truncated)", Env.Token[:5])
+	if Env.Token != "" {
+		logger.Info("github-exporter.environ loaded environment", "TOKEN(truncated)", Env.Token[:5])
+	}
 	logger.Info("github-exporter.environ loaded environment", "REFRESH_SECONDS", Env.RefreshSeconds)
 	logger.Info("github-exporter.environ loaded environment", "PORT_NUMBER", Env.PortNumber)
 	logger.Info("github-exporter.environ loaded environment", "GITHUB_USER", Env.GithubUser)

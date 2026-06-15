@@ -29,11 +29,14 @@ import (
 	"net/http"
 	"github-exporter/data"
 	"github-exporter/logger"
+	"github-exporter/jsonreq"
 )
 
 const promHeader = `# HELP github_clones number of clones of github project
 # TYPE github_clones gauge
-# HELP github_views number of biews of github project
+# HELP github_repo_stats count of stat
+# TYPE github_repo_stats gauge
+# HELP github_views number of views of github project
 # TYPE github_views gauge`
 
 var interval int64
@@ -42,10 +45,24 @@ func logRequest(r *http.Request) {
 	logger.Info("consumer.logRequest", "host", r.Host, "method", r.Method, "url", r.URL.Path, "user agent", r.UserAgent())
 }
 
-func sendPromLines(w http.ResponseWriter, projects []data.ProjectT) {
+func sendSingleLine(w http.ResponseWriter, project string, stat string, value int64) {
+
+	str := fmt.Sprintf("github_repo_stats{project=\"%s\",stat=\"%s\"} %d\n", project, stat, value)
+	fmt.Fprintf(w, str)
+	logger.Info("consumer.sendSingleLine", "reply", str)
+}
+
+func sendPromLines(w http.ResponseWriter, limitStats jsonreq.RateLimitT, projects []data.ProjectT) {
 
 	for _, entry := range projects {
-		str := fmt.Sprintf("github_clones{project=\"%s\",unique=\"true\"} %d\n", entry.Project, entry.Clones.Uniques)
+		str := fmt.Sprintf("github_exporter_stats{stat=\"ratelimit-limit\"} %d\n", limitStats.Limit)
+		fmt.Fprintf(w, str)
+		logger.Info("consumer.sendPromLines", "reply", str)
+		str = fmt.Sprintf("github_exporter_stats{stat=\"ratelimit-remaining\"} %d\n", limitStats.Remaining)
+		fmt.Fprintf(w, str)
+		logger.Info("consumer.sendPromLines", "reply", str)
+
+		str = fmt.Sprintf("github_clones{project=\"%s\",unique=\"true\"} %d\n", entry.Project, entry.Clones.Uniques)
 		fmt.Fprintf(w, str)
 		logger.Info("consumer.sendPromLines", "reply", str)
 		str = fmt.Sprintf("github_clones{project=\"%s\",unique=\"false\"} %d\n", entry.Project, entry.Clones.Count)
@@ -59,18 +76,37 @@ func sendPromLines(w http.ResponseWriter, projects []data.ProjectT) {
 		fmt.Fprintf(w, str)
 		logger.Info("consumer.sendPromLines", "reply", str)
 
+		sendSingleLine(w, entry.Project, "stargazers_count", entry.RepoStats.StargazersCount)
+		sendSingleLine(w, entry.Project, "watchers_count", entry.RepoStats.WatchersCount)
+		sendSingleLine(w, entry.Project, "forks_count", entry.RepoStats.ForksCount)
+		sendSingleLine(w, entry.Project, "network_count", entry.RepoStats.NetworkCount)
+		sendSingleLine(w, entry.Project, "subscribers_count", entry.RepoStats.SubscribersCount)
+		sendSingleLine(w, entry.Project, "open_pull_requests", entry.PullStats.NumOpen)
+		sendSingleLine(w, entry.Project, "closed_pull_requests", entry.PullStats.NumClosed)
+		sendSingleLine(w, entry.Project, "unassigned_pull_requests", entry.PullStats.NumUnassigned)
+		sendSingleLine(w, entry.Project, "open_issues", entry.IssueStats.NumOpen)
+		sendSingleLine(w, entry.Project, "closed_issues", entry.IssueStats.NumClosed)
+		sendSingleLine(w, entry.Project, "unassigned_issues", entry.IssueStats.NumUnassigned)
+		sendSingleLine(w, entry.Project, "branches", entry.BranchStats)
+		sendSingleLine(w, entry.Project, "commits", entry.CommitStats)
+
+		for _, contributor := range entry.ContributorStats {
+			str = fmt.Sprintf("github_repo_stats{project=\"%s\",stat=\"contributors\",contributor=\"%s\"} %d\n", entry.Project, contributor.Login, contributor.Contributions)
+			fmt.Fprintf(w, str)
+			logger.Info("consumer.sendPromLines", "reply", str)
+		}
 	}
 }
 
 func metricsHandler(w http.ResponseWriter, r *http.Request) {
 
 	logRequest(r)
-	projects, err := data.Get()
+	limitStats, projects, err := data.Get()
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 	} else {
 		fmt.Fprintln(w, promHeader)
-		sendPromLines(w, projects)
+		sendPromLines(w, limitStats, projects)
 	}
 }
 

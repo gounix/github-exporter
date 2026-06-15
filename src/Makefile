@@ -1,6 +1,6 @@
 IMAGE=github-exporter
-IMAGE_VERSION=1.0.0
-GOVERSION=1.26.3
+IMAGE_VERSION=2.0.0
+GOVERSION=1.26.4
 
 .PHONY: dockerhub clean
 
