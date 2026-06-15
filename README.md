@@ -29,4 +29,12 @@ The name of the secret should be "github-exporter".
 Another approach would be to use external-secrets in combination with Vault, as long as the secret name stays the same.
 
 # Available metrics
-At this time 2 metrics are available, `github_clones` and `github_views`, both metrics have the `unique` label to differentiate between all or unique entries.
+The following metrics are available:
+| Metric | description |
+| -------- | -------- |
+| `github_repo_stats` | This metric has the `stat` attribute with the following values
+`branches`, `closed_issues`, `closed_pull_requests`, `commits`, `contributors`, `forks_count`, `network_count`, `open_issues`, `open_pull_requests`, `stargazers_count`, `subscribers_count`, `unassigned_issues`, `unassigned_pull_requests`, `watchers_count`
+| `github_clones` and `github_views` | both metrics have the `unique` label to differentiate between all or unique entries. |
+
+# Grafana dashboard
+A grafana dashboard will be available shortly.
