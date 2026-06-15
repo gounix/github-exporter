@@ -37,4 +37,4 @@ The following metrics are available:
 | `github_clones` and `github_views` | both metrics have the `unique` label to differentiate between all or unique entries. |
 
 # Grafana dashboard
-A grafana dashboard will be available shortly.
+A grafana dashboard is available in the grafana directory.
