@@ -36,7 +36,7 @@ The following metrics are available:
 | `github_clones` and `github_views` | both metrics have the `unique` label to differentiate between all or unique entries. |
 
 # Grafana dashboard
-[github](https://github.com/gounix/github-exporter/tree/main/helm-charts)
+[github](https://github.com/gounix/github-exporter/tree/main/grafana)
 
 # Helm chart
 [github](https://github.com/gounix/github-exporter/tree/main/helm-charts)
