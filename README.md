@@ -1,5 +1,5 @@
 # github-exporter
-The github-exporter deployment makes github clones and views statistics available to prometheus. On startup it queries the specified GITHUB_USER and starts to monitor all its repositories. The statistics are gathered with the personal access token.
+The github-exporter deployment makes various github statistics available to prometheus. On startup it queries the specified GITHUB_USER and starts to monitor all its repositories. The statistics are gathered with the personal access token.
 
 The values are made available for scraping by prometheus. The scrape url is http://<service_address>:<PORT>/metrics. If you use the prometheus-operator deployment in combination with our helm chart the scrape config is not needed. The helm chart contains a serviceMonitor definition.
 
@@ -12,10 +12,11 @@ The following enviroment variables are supported:
 | GITHUB_USER | The github user account that owns the repositories that should be monitored |
 
 # First deployment
+This deployment depends on a secret named `github-exporter` in the namespace of the deployment.
 The first deployment will fail because the secret is not yet created. After the first deployment the namespace exists so we can create the secret(in the next section). After this the pod should be rstarted to pickup the new secret.
 
 # Secrets
-The github-exporter needs a github personal access token to read the statistics. This token can be genarated as follows
+The github-exporter needs a github personal access token to read the statistics. This token can be generated as follows
 [github](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-fine-grained-personal-access-token)
 
 Make sure that the token has the "Administration" permission.
