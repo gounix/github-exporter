@@ -39,6 +39,7 @@ const (
 	repoStatUrlPattern         = "https://api.github.com/repos/%s"
 	pullStatUrlPattern         = "https://api.github.com/repos/%s/pulls?state=all;per_page=250"
 	issueStatUrlPattern        = "https://api.github.com/repos/%s/issues?state=all;per_page=250"
+	tagStatUrlPattern          = "https://api.github.com/repos/%s/tags"
 	branchStatUrlPattern       = "https://api.github.com/repos/%s/branches"
 	commitStatUrlPattern       = "https://api.github.com/repos/%s/commits?per_page=250"
 	contributorsStatUrlPattern = "https://api.github.com/repos/%s/contributors?per_page=250"
@@ -50,6 +51,9 @@ type (
 	}
 	CommitT struct {
 		Committer CommitterT `json:"committer"`
+	}
+	TagT struct {
+		Name string `json:"name"`
 	}
 	BranchT struct {
 		Name string `json:"name"`
@@ -100,6 +104,21 @@ func getCommitStats(project string) (int64, error) {
 	}
 
 	slog.Info("producer.getCommitStats", "project", project, "#commits", len(raw))
+	return int64(len(raw)), nil
+}
+
+func getTagStats(project string) (int64, error) {
+	var raw []TagT
+
+        url := fmt.Sprintf(tagStatUrlPattern, project)
+        slog.Info("producer.getTagStats", "url", url)
+
+	if err := jsonreq.GetJsonRespPaginated(url, environ.Env.Token, "application/vnd.github+json", &raw); err != nil {
+                slog.Error("producer.getTagStats", "jsonreq.GetJsonResp", err)
+                return 0, err
+	}
+
+	slog.Info("producer.getTagStats", "project", project, "#tags", len(raw))
 	return int64(len(raw)), nil
 }
 
@@ -234,6 +253,11 @@ func repoLoop(repos []string) {
 		stats.IssueStats, err = getIssueStats(project)
 		if err != nil {
 			slog.Error("producer.repoLoop issuestats", "project", project, "err", err)
+		}
+
+		stats.TagStats, err = getTagStats(project)
+		if err != nil {
+			slog.Error("producer.repoLoop tagstats", "project", project, "err", err)
 		}
 
 		stats.BranchStats, err = getBranchStats(project)

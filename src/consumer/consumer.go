@@ -27,6 +27,7 @@ package consumer
 import (
 	"fmt"
 	"github-exporter/data"
+	"github-exporter/environ"
 	"github-exporter/jsonreq"
 	"log/slog"
 	"net/http"
@@ -47,7 +48,7 @@ func logRequest(r *http.Request) {
 
 func sendSingleLine(w http.ResponseWriter, project string, stat string, value int64) {
 
-	str := fmt.Sprintf("github_repo_stats{project=\"%s\",stat=\"%s\"} %d\n", project, stat, value)
+	str := fmt.Sprintf("github_repo_stats{user=\"%s\",project=\"%s\",stat=\"%s\"} %d\n", environ.Env.GithubUser, project, stat, value)
 	fmt.Fprintf(w, str)
 	slog.Info("consumer.sendSingleLine", "reply", str)
 }
@@ -55,24 +56,24 @@ func sendSingleLine(w http.ResponseWriter, project string, stat string, value in
 func sendPromLines(w http.ResponseWriter, limitStats jsonreq.RateLimitT, projects []data.ProjectT) {
 
 	for _, entry := range projects {
-		str := fmt.Sprintf("github_exporter_stats{stat=\"ratelimit-limit\"} %d\n", limitStats.Limit)
+		str := fmt.Sprintf("github_exporter_stats{user=\"%s\",stat=\"ratelimit-limit\"} %d\n", environ.Env.GithubUser, limitStats.Limit)
 		fmt.Fprintf(w, str)
 		slog.Info("consumer.sendPromLines", "reply", str)
-		str = fmt.Sprintf("github_exporter_stats{stat=\"ratelimit-remaining\"} %d\n", limitStats.Remaining)
-		fmt.Fprintf(w, str)
-		slog.Info("consumer.sendPromLines", "reply", str)
-
-		str = fmt.Sprintf("github_clones{project=\"%s\",unique=\"true\"} %d\n", entry.Project, entry.Clones.Uniques)
-		fmt.Fprintf(w, str)
-		slog.Info("consumer.sendPromLines", "reply", str)
-		str = fmt.Sprintf("github_clones{project=\"%s\",unique=\"false\"} %d\n", entry.Project, entry.Clones.Count)
+		str = fmt.Sprintf("github_exporter_stats{user=\"%s\",stat=\"ratelimit-remaining\"} %d\n", environ.Env.GithubUser, limitStats.Remaining)
 		fmt.Fprintf(w, str)
 		slog.Info("consumer.sendPromLines", "reply", str)
 
-		str = fmt.Sprintf("github_views{project=\"%s\",unique=\"true\"} %d\n", entry.Project, entry.Views.Uniques)
+		str = fmt.Sprintf("github_clones{user=\"%s\",project=\"%s\",unique=\"true\"} %d\n", environ.Env.GithubUser, entry.Project, entry.Clones.Uniques)
 		fmt.Fprintf(w, str)
 		slog.Info("consumer.sendPromLines", "reply", str)
-		str = fmt.Sprintf("github_views{project=\"%s\",unique=\"false\"} %d\n", entry.Project, entry.Views.Count)
+		str = fmt.Sprintf("github_clones{user=\"%s\",project=\"%s\",unique=\"false\"} %d\n", environ.Env.GithubUser, entry.Project, entry.Clones.Count)
+		fmt.Fprintf(w, str)
+		slog.Info("consumer.sendPromLines", "reply", str)
+
+		str = fmt.Sprintf("github_views{user=\"%s\",project=\"%s\",unique=\"true\"} %d\n", environ.Env.GithubUser, entry.Project, entry.Views.Uniques)
+		fmt.Fprintf(w, str)
+		slog.Info("consumer.sendPromLines", "reply", str)
+		str = fmt.Sprintf("github_views{user=\"%s\",project=\"%s\",unique=\"false\"} %d\n", environ.Env.GithubUser, entry.Project, entry.Views.Count)
 		fmt.Fprintf(w, str)
 		slog.Info("consumer.sendPromLines", "reply", str)
 
@@ -87,11 +88,12 @@ func sendPromLines(w http.ResponseWriter, limitStats jsonreq.RateLimitT, project
 		sendSingleLine(w, entry.Project, "open_issues", entry.IssueStats.NumOpen)
 		sendSingleLine(w, entry.Project, "closed_issues", entry.IssueStats.NumClosed)
 		sendSingleLine(w, entry.Project, "unassigned_issues", entry.IssueStats.NumUnassigned)
+		sendSingleLine(w, entry.Project, "tags", entry.TagStats)
 		sendSingleLine(w, entry.Project, "branches", entry.BranchStats)
 		sendSingleLine(w, entry.Project, "commits", entry.CommitStats)
 
 		for _, contributor := range entry.ContributorStats {
-			str = fmt.Sprintf("github_repo_stats{project=\"%s\",stat=\"contributors\",contributor=\"%s\"} %d\n", entry.Project, contributor.Login, contributor.Contributions)
+			str = fmt.Sprintf("github_repo_stats{user=\"%s\",project=\"%s\",stat=\"contributors\",contributor=\"%s\"} %d\n", environ.Env.GithubUser, entry.Project, contributor.Login, contributor.Contributions)
 			fmt.Fprintf(w, str)
 			slog.Info("consumer.sendPromLines", "reply", str)
 		}

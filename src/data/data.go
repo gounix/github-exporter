@@ -47,31 +47,32 @@ type (
                 Uniques int64 `json:"uniques"`
         }
 	GHPullStats struct {
-		NumOpen int64
-		NumClosed int64
+		NumOpen       int64
+		NumClosed     int64
 		NumUnassigned int64
 	}
 	GHIssueStats struct {
-		NumOpen int64
-		NumClosed int64
+		NumOpen       int64
+		NumClosed     int64
 		NumUnassigned int64
 	}
 	GHContributorStatsT struct {
-                Login string `json:"login"`
-                Contributions int64 `json:""contributions""`
+                Login         string `json:"login"`
+                Contributions int64  `json:""contributions""`
         }
 
 	ProjectT struct {
-		Project     string
-		Clones      GHTrafficStats
-		Views       GHTrafficStats
-		RepoStats   GHRepoStats
-		PullStats   GHPullStats
-		IssueStats  GHIssueStats
-		ContributorStats  []GHContributorStatsT
-		BranchStats int64
-		CommitStats int64
-		Initialized bool
+		Project          string
+		Clones           GHTrafficStats
+		Views            GHTrafficStats
+		RepoStats        GHRepoStats
+		PullStats        GHPullStats
+		IssueStats       GHIssueStats
+		ContributorStats []GHContributorStatsT
+		TagStats         int64
+		BranchStats      int64
+		CommitStats      int64
+		Initialized      bool
 	}
 	dataT struct {
 		mu          sync.Mutex
