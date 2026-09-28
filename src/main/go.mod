@@ -2,7 +2,6 @@ module github-exporter/main
 
 go 1.26.0
 
-require github-exporter/logger v0.0.0-unpublished
 require github-exporter/environ v0.0.0-unpublished
 require github-exporter/producer v0.0.0-unpublished
 require github-exporter/consumer v0.0.0-unpublished
@@ -53,7 +52,6 @@ require (
 	sigs.k8s.io/yaml v1.6.0 // indirect
 )
 
-replace github-exporter/logger v0.0.0-unpublished => ../logger
 replace github-exporter/environ v0.0.0-unpublished => ../environ
 replace github-exporter/producer v0.0.0-unpublished => ../producer
 replace github-exporter/consumer v0.0.0-unpublished => ../consumer

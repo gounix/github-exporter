@@ -26,25 +26,19 @@ package main
 
 import (
 	"os"
-	"github-exporter/producer"
 	"github-exporter/consumer"
 	"github-exporter/environ"
-	"github-exporter/logger"
-	"github-exporter/github"
+	"log/slog"
+	"github-exporter/producer"
 )
 
 func main() {
+	slog.Info("github-exporter.main run started", "version", "Development-version", "go", "Golang-version")
 	if err := environ.Load(); err != nil {
-                logger.Error("github-exporter/main", "environ.Load", err)
+                slog.Error("github-exporter/main", "environ.Load", err)
 		os.Exit(1)
         }
 
-	repos, err := github.GetRepos(environ.Env.GithubUser)
-	if err != nil {
-		logger.Error("github-exporter/main", "github.GetRepos", err)
-		os.Exit(1)
-	}
-
-	go producer.Put(repos, environ.Env.RefreshSeconds)
+	go producer.Refresh()
 	consumer.Get(environ.Env.PortNumber, environ.Env.RefreshSeconds)
 }

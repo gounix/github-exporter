@@ -26,7 +26,7 @@ package environ
 
 import (
         "go-simpler.org/env"
-	"github-exporter/logger"
+	"log/slog"
 	"os"
 )
 
@@ -41,14 +41,14 @@ var Env EnvT
 
 func Load() error {
 	if err := env.Load(&Env, nil); err != nil {
-                logger.Error("github-exporter/environ", "env.Load", err)
+                slog.Error("github-exporter/environ", "env.Load", err)
 		os.Exit(1)
         }
 	if Env.Token != "" {
-		logger.Info("github-exporter.environ loaded environment", "TOKEN(truncated)", Env.Token[:5])
+		slog.Info("github-exporter.environ loaded environment", "TOKEN(truncated)", Env.Token[:5])
 	}
-	logger.Info("github-exporter.environ loaded environment", "REFRESH_SECONDS", Env.RefreshSeconds)
-	logger.Info("github-exporter.environ loaded environment", "PORT_NUMBER", Env.PortNumber)
-	logger.Info("github-exporter.environ loaded environment", "GITHUB_USER", Env.GithubUser)
+	slog.Info("github-exporter.environ loaded environment", "REFRESH_SECONDS", Env.RefreshSeconds)
+	slog.Info("github-exporter.environ loaded environment", "PORT_NUMBER", Env.PortNumber)
+	slog.Info("github-exporter.environ loaded environment", "GITHUB_USER", Env.GithubUser)
 	return nil
 }

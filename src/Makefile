@@ -1,11 +1,11 @@
 IMAGE=github-exporter
-IMAGE_VERSION=2.0.0
-GOVERSION=1.26.4
+IMAGE_VERSION=2.1.0
+GOVERSION=1.26
 
 .PHONY: dockerhub clean
 
 dockerhub:
-	buildah build --build-arg GOVERSION=${GOVERSION} -t ${IMAGE}:${IMAGE_VERSION} .
+	buildah build --build-arg GOVERSION=${GOVERSION} --build-arg IMAGE_VERSION=${IMAGE_VERSION} -t ${IMAGE}:${IMAGE_VERSION} .
 	#buildah login docker.io
 	buildah push ${IMAGE}:${IMAGE_VERSION} gounix/${IMAGE}:${IMAGE_VERSION}
 

@@ -30,7 +30,7 @@ import (
         "encoding/json"
         "io"
 	"strconv"
-        "github-exporter/logger"
+        "log/slog"
 )
 
 type RateLimitT struct {
@@ -53,14 +53,14 @@ func ratelimit(header http.Header) {
 	if err == nil {
 		limitStats.Limit = int64(value)
 	} else {
-		logger.Error("jsonreq.ratelimit atoi x-ratelimit-limit", "err", err)
+		slog.Error("jsonreq.ratelimit atoi x-ratelimit-limit", "err", err)
 	}
 	str = header.Get("x-ratelimit-remaining")
 	value, err = strconv.Atoi(str)
 	if err == nil {
 		limitStats.Remaining = int64(value)
 	} else {
-		logger.Error("jsonreq.ratelimit atoi x-ratelimit-remaining", "err", err)
+		slog.Error("jsonreq.ratelimit atoi x-ratelimit-remaining", "err", err)
 	}
 }
 
@@ -78,20 +78,20 @@ func GetJsonResp(url string, token string, accept string, dat any) error {
 
         resp, err := client.Do(req)
         if err != nil {
-                logger.Error("jsonreq.getJsonResp", "client.do error", err)
+                slog.Error("jsonreq.getJsonResp", "client.do error", err)
                 return err
         }
 
         defer resp.Body.Close()
 	ratelimit(resp.Header)
         if resp.StatusCode != 200 {
-                logger.Error("jsonreq.getJsonResp", "status", resp.Status)
+                slog.Error("jsonreq.getJsonResp", "status", resp.Status)
                 return err
         }
 
         body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		logger.Error("jsonreq.getJsonResp", "io.ReadAll error", err)
+		slog.Error("jsonreq.getJsonResp", "io.ReadAll error", err)
 		return err
         }
 
@@ -143,7 +143,7 @@ func GetJsonRespPaginated(url string, token string, accept string, dat any) erro
 	for {
 		var data []map[string]interface{} 
 
-		logger.Info("GetJsonRespPaginated", "url", next_url)
+		slog.Info("GetJsonRespPaginated", "url", next_url)
 		req, err := http.NewRequest("GET", next_url, nil)
 		if accept != "" {
 			req.Header.Add("accept", accept)
@@ -155,25 +155,25 @@ func GetJsonRespPaginated(url string, token string, accept string, dat any) erro
 
 		resp, err := client.Do(req)
 		if err != nil {
-			logger.Error("jsonreq.GetJsonRespPaginated", "client.do error", err)
+			slog.Error("jsonreq.GetJsonRespPaginated", "client.do error", err)
 			return err
 		}
 
 		defer resp.Body.Close()
 		ratelimit(resp.Header)
 		if resp.StatusCode != 200 {
-			logger.Error("jsonreq.GetJsonRespPaginated", "status", resp.Status)
+			slog.Error("jsonreq.GetJsonRespPaginated", "status", resp.Status)
 			return err
 		}
 
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
-			logger.Error("jsonreq.GetJsonRespPaginated", "io.ReadAll error", err)
+			slog.Error("jsonreq.GetJsonRespPaginated", "io.ReadAll error", err)
 			return err
 		}
 		err = json.Unmarshal(body,&data)
 		if err != nil {
-			logger.Error("jsonreq.GetJsonRespPaginated", "json err", err)
+			slog.Error("jsonreq.GetJsonRespPaginated", "json err", err)
 		}
 
 		full_body = append(full_body, data...)
@@ -184,7 +184,7 @@ func GetJsonRespPaginated(url string, token string, accept string, dat any) erro
 	}
 	jsonBody, err := json.Marshal(full_body)
 	if err != nil {
-		logger.Error("jsonreq.GetJsonRespPaginated", "json.Marshall err", err)
+		slog.Error("jsonreq.GetJsonRespPaginated", "json.Marshall err", err)
 	}
         return json.Unmarshal(jsonBody, dat)
 }

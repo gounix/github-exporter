@@ -25,12 +25,12 @@ SOFTWARE.
 package data
 
 import (
+	"errors"
+	"github-exporter/jsonreq"
+	"log/slog"
 	"math"
 	"sync"
 	"time"
-	"errors"
-	"github-exporter/logger"
-	"github-exporter/jsonreq"
 )
 
 type (
@@ -85,6 +85,9 @@ type (
 var data = dataT{ initialized: false }
 
 func Initialize(projects []string) {
+	data.mu.Lock()
+	defer data.mu.Unlock()
+
 	for _, entry := range projects {
 		var project_data ProjectT
 		project_data.Project = entry
@@ -93,27 +96,21 @@ func Initialize(projects []string) {
 	}
 }
 
-func Put(project string, clones GHTrafficStats, views GHTrafficStats, repoStats GHRepoStats, pullStats GHPullStats, issueStats GHIssueStats, branchStats int64, commitStats int64, contributorStats []GHContributorStatsT, limitStats jsonreq.RateLimitT) {
+func Put(stats ProjectT, limitStats jsonreq.RateLimitT) {
 	data.mu.Lock()
 	defer data.mu.Unlock()
 
 	data.limitStats = limitStats
 	for nr, _ := range data.projects {
-		if data.projects[nr].Project == project {
-			data.projects[nr].Clones = clones
-			data.projects[nr].Views = views
-			data.projects[nr].RepoStats = repoStats
-			data.projects[nr].PullStats = pullStats
-			data.projects[nr].IssueStats = issueStats
-			data.projects[nr].BranchStats = branchStats
-			data.projects[nr].CommitStats = commitStats
-			data.projects[nr].ContributorStats = contributorStats
+		if data.projects[nr].Project == stats.Project {
+
+			data.projects[nr] = stats
 			data.projects[nr].Initialized = true
 
 			data.timestamp = time.Now()
 			data.initialized = true
 
-			logger.Info("data.Put", "project", data.projects[nr].Project, "clones.count", data.projects[nr].Clones.Count, "clones.uniques", data.projects[nr].Clones.Uniques, "views.count", data.projects[nr].Views.Count, "views.uniques", data.projects[nr].Views.Uniques)
+			slog.Info("data.Put", "project", data.projects[nr].Project, "clones.count", data.projects[nr].Clones.Count, "clones.uniques", data.projects[nr].Clones.Uniques, "views.count", data.projects[nr].Views.Count, "views.uniques", data.projects[nr].Views.Uniques)
 		}
 	}
 }
@@ -123,17 +120,17 @@ func Get() (jsonreq.RateLimitT, []ProjectT, error) {
 	defer data.mu.Unlock()
 
 	if !data.initialized {
-		logger.Info("data.Get all not initialized")
+		slog.Info("data.Get all not initialized")
 		return jsonreq.RateLimitT{}, []ProjectT{}, errors.New("not initialized")
 	}
 	for _, entry := range data.projects {
 		if !entry.Initialized {
-			logger.Info("data.Get not initialized", "entry", entry.Project, "clones.count", entry.Clones.Count)
+			slog.Info("data.Get not initialized", "entry", entry.Project, "clones.count", entry.Clones.Count)
 			return jsonreq.RateLimitT{}, []ProjectT{}, errors.New("not initialized")
 		}
 	}
 	// all is OK now
-	logger.Info("data.Get", "first project", data.projects[0].Project, "nr projects", len(data.projects))
+	slog.Info("data.Get", "first project", data.projects[0].Project, "nr projects", len(data.projects))
 	return data.limitStats, data.projects, nil
 }
 
@@ -143,7 +140,7 @@ func Alive(interval int64) bool {
 
 	// consider the producer dead after it missed 2 intervals
 	isOK := diff.Seconds() < float64(2 * interval)
-	logger.Info("data.Alive", "age(seconds)", math.Floor(diff.Seconds()), "OK", isOK)
+	slog.Info("data.Alive", "age(seconds)", math.Floor(diff.Seconds()), "OK", isOK)
 
 	return isOK
 }

@@ -25,12 +25,13 @@ SOFTWARE.
 package producer
 
 import (
-	"github-exporter/data"
-	"github-exporter/logger"
-	"github-exporter/environ"
-	"github-exporter/jsonreq"
-	"time"
 	"fmt"
+	"github-exporter/data"
+	"github-exporter/environ"
+	"github-exporter/github"
+	"github-exporter/jsonreq"
+	"log/slog"
+	"time"
 )
 
 const (
@@ -76,13 +77,14 @@ func GetContributorsStats(project string) ([]data.GHContributorStatsT, error) {
 	var raw []data.GHContributorStatsT
 
         url := fmt.Sprintf(contributorsStatUrlPattern, project)
-        logger.Info("producer.GetContributorsStats", "url", url)
+        slog.Info("producer.GetContributorsStats", "url", url)
 
 	if err := jsonreq.GetJsonRespPaginated(url, environ.Env.Token, "application/vnd.github+json", &raw); err != nil {
-                logger.Error("producer.GetContributorsStats", "jsonreq.GetJsonResp", err)
+                slog.Error("producer.GetContributorsStats", "jsonreq.GetJsonResp", err)
                 return []data.GHContributorStatsT{}, err
 	}
 
+	slog.Info("producer.GetContributorsStats", "project", project, "#contributors", len(raw))
 	return raw, nil
 }
 
@@ -90,13 +92,14 @@ func getCommitStats(project string) (int64, error) {
 	var raw []CommitT
 
         url := fmt.Sprintf(commitStatUrlPattern, project)
-        logger.Info("producer.getCommitStats", "url", url)
+        slog.Info("producer.getCommitStats", "url", url)
 
 	if err := jsonreq.GetJsonRespPaginated(url, environ.Env.Token, "application/vnd.github+json", &raw); err != nil {
-                logger.Error("producer.getCommitStats", "jsonreq.GetJsonResp", err)
+                slog.Error("producer.getCommitStats", "jsonreq.GetJsonResp", err)
                 return 0, err
 	}
 
+	slog.Info("producer.getCommitStats", "project", project, "#commits", len(raw))
 	return int64(len(raw)), nil
 }
 
@@ -104,13 +107,14 @@ func getBranchStats(project string) (int64, error) {
 	var raw []BranchT
 
         url := fmt.Sprintf(branchStatUrlPattern, project)
-        logger.Info("producer.getBranchStats", "url", url)
+        slog.Info("producer.getBranchStats", "url", url)
 
 	if err := jsonreq.GetJsonRespPaginated(url, environ.Env.Token, "application/vnd.github+json", &raw); err != nil {
-                logger.Error("producer.getBranchStats", "jsonreq.GetJsonResp", err)
+                slog.Error("producer.getBranchStats", "jsonreq.GetJsonResp", err)
                 return 0, err
 	}
 
+	slog.Info("producer.getBranchStats", "project", project, "#branches", len(raw))
 	return int64(len(raw)), nil
 }
 
@@ -119,10 +123,10 @@ func getPullStats(project string) (data.GHPullStats, error) {
 	var raw []PullsT
 
         url := fmt.Sprintf(pullStatUrlPattern, project)
-        logger.Info("producer.getPullStats", "url", url)
+        slog.Info("producer.getPullStats", "url", url)
 
 	if err := jsonreq.GetJsonRespPaginated(url, environ.Env.Token, "application/vnd.github+json", &raw); err != nil {
-                logger.Error("producer.getPullStats", "jsonreq.GetJsonResp", err)
+                slog.Error("producer.getPullStats", "jsonreq.GetJsonResp", err)
                 return data.GHPullStats{}, err
 	}
 	for _, entry := range raw {
@@ -136,6 +140,7 @@ func getPullStats(project string) (data.GHPullStats, error) {
 		}
 	}
 
+	slog.Info("producer.getPullStats", "project", project, "numOpen", dat.NumOpen, "numClosed", dat.NumClosed, "numUnassigned", dat.NumUnassigned)
 	return dat, nil
 }
 
@@ -144,10 +149,10 @@ func getIssueStats(project string) (data.GHIssueStats, error) {
 	var raw []IssuesT
 
         url := fmt.Sprintf(issueStatUrlPattern, project)
-        logger.Info("producer.getIssueStats", "url", url)
+        slog.Info("producer.getIssueStats", "url", url)
 
 	if err := jsonreq.GetJsonRespPaginated(url, environ.Env.Token, "application/vnd.github+json", &raw); err != nil {
-                logger.Error("producer.getIssueStats", "jsonreq.GetJsonResp", err)
+                slog.Error("producer.getIssueStats", "jsonreq.GetJsonResp", err)
                 return data.GHIssueStats{}, err
 	}
 	for _, entry := range raw {
@@ -164,6 +169,7 @@ func getIssueStats(project string) (data.GHIssueStats, error) {
 		}
 	}
 
+	slog.Info("producer.getIssueStats", "project", project, "numOpen", dat.NumOpen, "numClosed", dat.NumClosed, "numUnassigned", dat.NumUnassigned)
 	return dat, nil
 }
 
@@ -171,84 +177,97 @@ func getRepoStats(project string) (data.GHRepoStats, error) {
 	var dat data.GHRepoStats
 
         url := fmt.Sprintf(repoStatUrlPattern, project)
-        logger.Info("producer.getRepoStats", "url", url)
+        slog.Info("producer.getRepoStats", "url", url)
 
 	if err := jsonreq.GetJsonResp(url, environ.Env.Token, "application/vnd.github+json", &dat); err != nil {
-                logger.Error("producer.getRepoStats", "jsonreq.GetJsonResp", err)
+                slog.Error("producer.getRepoStats", "jsonreq.GetJsonResp", err)
                 return data.GHRepoStats{}, err
 	}
 
+	slog.Info("producer.getRepoStats", "project", project, "StargazersCount", dat.StargazersCount, "WatchersCount", dat.WatchersCount, "ForksCount", dat.ForksCount, "OpenIssuesCount", dat.OpenIssuesCount, "NetworkCount", dat.NetworkCount, "SubscribersCount", dat.SubscribersCount)
 	return dat, nil
 }
 
-func getTrafficStat(project string, stat string) (data.GHTrafficStats, error) {
+func getTrafficStats(project string, stat string) (data.GHTrafficStats, error) {
 	var dat data.GHTrafficStats
 
         url := fmt.Sprintf(trafficStatUrlPattern, project, stat)
-        logger.Info("producer.getTrafficStat", "url", url)
+        slog.Info("producer.getTrafficStats", "url", url)
 
 	if err := jsonreq.GetJsonResp(url, environ.Env.Token, "application/vnd.github+json", &dat); err != nil {
-                logger.Error("producer.getTrafficStat", "jsonreq.GetJsonResp", err)
+                slog.Error("producer.getTrafficStats", "jsonreq.GetJsonResp", err)
                 return data.GHTrafficStats{}, err
 	}
 
+	slog.Info("producer.getTrafficStats", "project", project, "stat", stat, "count", dat.Count, "uniques", dat.Uniques)
 	return dat, nil
 }
 
 
 
-func Put(repos []string, interval int64) {
+func repoLoop(repos []string) {
+	var err error
+
 	data.Initialize(repos)
-	for {
-		for _, entry := range repos {
-			clones, err := getTrafficStat(entry, "clones")
-			if err != nil {
-				logger.Error("producer.Put clones", "project", entry, "err", err)
-			}
-			views, err := getTrafficStat(entry, "views")
-			if err != nil {
-				logger.Error("producer.Put views", "project", entry, "err", err)
-			}
-			repoStats, err := getRepoStats(entry)
-			if err != nil {
-				logger.Error("producer.Put repostats", "project", entry, "err", err)
-			}
+	for _, project := range repos {
+		var stats data.ProjectT
 
-			pullStats, err := getPullStats(entry)
-			if err != nil {
-				logger.Error("producer.Put pullstats", "project", entry, "err", err)
-			}
-			logger.Info("producer.Put", "project pull stats", entry, "numOpen", pullStats.NumOpen, "numClosed", pullStats.NumClosed, "numUnassigned", pullStats.NumUnassigned)
-
-			issueStats, err := getIssueStats(entry)
-			if err != nil {
-				logger.Error("producer.Put issuestats", "project", entry, "err", err)
-			}
-			logger.Info("producer.Put", "project issue stats", entry, "numOpen", issueStats.NumOpen, "numClosed", issueStats.NumClosed, "numUnassigned", issueStats.NumUnassigned)
-
-			branchStats, err := getBranchStats(entry)
-			if err != nil {
-				logger.Error("producer.Put branchstats", "project", entry, "err", err)
-			}
-			logger.Info("producer.Put", "branch stats", entry, "#branches", branchStats)
-
-			commitStats, err := getCommitStats(entry)
-			if err != nil {
-				logger.Error("producer.Put commitstats", "project", entry, "err", err)
-			}
-			logger.Info("producer.Put", "commit stats", entry, "#commits", commitStats)
-
-			contributorStats, err := GetContributorsStats(entry)
-			if err != nil {
-				logger.Error("producer.Put contributorsStats", "project", entry, "err", err)
-			}
-			logger.Info("producer.Put", "contributor stats", entry, "#contributors", len(contributorStats))
-
-			limitStats := jsonreq.GetRateLimit()
-			logger.Info("producer.Put", "x-ratelimit-limit", limitStats.Limit, "x-ratelimit-remaining", limitStats.Remaining)
-
-			data.Put(entry, clones, views, repoStats, pullStats, issueStats, branchStats, commitStats, contributorStats, limitStats)
+		stats.Project = project
+		stats.Clones, err = getTrafficStats(project, "clones")
+		if err != nil {
+			slog.Error("producer.repoLoop clones", "project", project, "err", err)
 		}
-		time.Sleep(time.Duration(interval) * time.Second)
+		stats.Views, err = getTrafficStats(project, "views")
+		if err != nil {
+			slog.Error("producer.repoLoop views", "project", project, "err", err)
+		}
+		stats.RepoStats, err = getRepoStats(project)
+		if err != nil {
+			slog.Error("producer.repoLoop repostats", "project", project, "err", err)
+		}
+
+		stats.PullStats, err = getPullStats(project)
+		if err != nil {
+			slog.Error("producer.repoLoop pullstats", "project", project, "err", err)
+		}
+
+		stats.IssueStats, err = getIssueStats(project)
+		if err != nil {
+			slog.Error("producer.repoLoop issuestats", "project", project, "err", err)
+		}
+
+		stats.BranchStats, err = getBranchStats(project)
+		if err != nil {
+			slog.Error("producer.repoLoop branchstats", "project", project, "err", err)
+		}
+
+		stats.CommitStats, err = getCommitStats(project)
+		if err != nil {
+			slog.Error("producer.repoLoop commitstats", "project", project, "err", err)
+		}
+
+		stats.ContributorStats, err = GetContributorsStats(project)
+		if err != nil {
+			slog.Error("producer.repoLoop contributorsStats", "project", project, "err", err)
+		}
+
+		limitStats := jsonreq.GetRateLimit()
+		slog.Info("producer.repoLoop", "x-ratelimit-limit", limitStats.Limit, "x-ratelimit-remaining", limitStats.Remaining)
+
+		data.Put(stats, limitStats)
+	}
+}
+
+func Refresh() {
+	for {
+		repos, err := github.GetRepos(environ.Env.GithubUser)
+		if err != nil {
+			slog.Error("producer/Refresh", "github.GetRepos", err)
+		} else {
+			repoLoop(repos)
+		}
+
+		slog.Info("producer.Refresh", "sleeping", environ.Env.RefreshSeconds)
+		time.Sleep(time.Duration(environ.Env.RefreshSeconds) * time.Second)
 	}
 }
