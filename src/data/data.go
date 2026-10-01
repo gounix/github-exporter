@@ -89,11 +89,27 @@ func Initialize(projects []string) {
 	data.mu.Lock()
 	defer data.mu.Unlock()
 
-	for _, entry := range projects {
-		var project_data ProjectT
-		project_data.Project = entry
-		project_data.Initialized = false
-		data.projects = append(data.projects, project_data)
+	existingProjectList := data.projects
+	data.projects = []ProjectT{}
+	// add new projects, remove old projects
+	for _, newProject := range projects {
+		found := false
+		for _, existingProject := range existingProjectList {
+			// only add existing projects that are on the new list
+			if newProject == existingProject.Project {
+				data.projects = append(data.projects, existingProject)
+				slog.Info("data.Initialize", "re-added", newProject)
+				found = true
+			}
+		}
+		if ! found {
+			var project_data ProjectT
+
+			project_data.Project = newProject
+			project_data.Initialized = false
+			data.projects = append(data.projects, project_data)
+			slog.Info("data.Initialize", "added", newProject)
+		}
 	}
 }
 

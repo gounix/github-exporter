@@ -227,7 +227,6 @@ func getTrafficStats(project string, stat string) (data.GHTrafficStats, error) {
 func repoLoop(repos []string) {
 	var err error
 
-	data.Initialize(repos)
 	for _, project := range repos {
 		var stats data.ProjectT
 
@@ -288,6 +287,7 @@ func Refresh() {
 		if err != nil {
 			slog.Error("producer/Refresh", "github.GetRepos", err)
 		} else {
+			data.Initialize(repos)
 			repoLoop(repos)
 		}
 

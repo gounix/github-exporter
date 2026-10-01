@@ -27,7 +27,7 @@ package github
 import (
 	"fmt"
 	"github-exporter/jsonreq"
-	"github-exporter/logger"
+	"log/slog"
 )
 
 const getReposUrlPattern = "https://api.github.com/users/%s/repos"
@@ -41,15 +41,15 @@ func GetRepos(user string) ([]string, error) {
 	var lst []string
 
 	url := fmt.Sprintf(getReposUrlPattern, user)
-	logger.Info("github.GetRepos", "url", url)
+	slog.Info("github.GetRepos", "url", url)
 
 	if err := jsonreq.GetJsonResp(url, "", "application/vnd.github+json", &dat); err != nil {
-                logger.Error("github.GetRepos", "jsonreq.GetJsonResp", err)
+                slog.Error("github.GetRepos", "jsonreq.GetJsonResp", err)
                 return []string{}, err
         }
 
 	for _, entry := range dat {
-		logger.Info("github-exporter/GetRepos", "repo", entry.FullName)
+		slog.Info("github-exporter/GetRepos", "repo", entry.FullName)
 		lst = append(lst, entry.FullName)
 	}
         return lst, nil
