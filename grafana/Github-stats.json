@@ -15,7 +15,7 @@
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
-      "version": "12.4.3"
+      "version": "12.4.8"
     },
     {
       "type": "datasource",
@@ -33,6 +33,12 @@
       "type": "panel",
       "id": "table",
       "name": "Table",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "timeseries",
+      "name": "Time series",
       "version": ""
     }
   ],
@@ -117,11 +123,11 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.4.3",
+      "pluginVersion": "12.4.8",
       "targets": [
         {
           "editorMode": "code",
-          "expr": "sum(github_exporter_stats{stat=\"ratelimit-limit\"})",
+          "expr": "sum(github_exporter_stats{user=\"$user\",stat=\"ratelimit-limit\"})",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A",
@@ -181,11 +187,11 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.4.3",
+      "pluginVersion": "12.4.8",
       "targets": [
         {
           "editorMode": "code",
-          "expr": "sum(github_exporter_stats{stat=\"ratelimit-remaining\"})",
+          "expr": "sum(github_exporter_stats{user=\"$user\",stat=\"ratelimit-remaining\"})",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A",
@@ -205,6 +211,551 @@
         "w": 24,
         "x": 0,
         "y": 6
+      },
+      "id": 26,
+      "panels": [],
+      "title": "User level stats",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 7
+      },
+      "id": 28,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
+          "sortBy": "Last *",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.4.8",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "sum(github_clones{user=\"$user\",unique=\"false\",project=~\"$project\"}) by (project)",
+          "legendFormat": "{{project}}",
+          "range": true,
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          }
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "expr": "sum(github_clones{unique=\"true\"}) by (project)",
+          "hide": true,
+          "instant": false,
+          "legendFormat": "{{project}} (uniq)",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "timeFrom": "60d",
+      "title": "Clones",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 7
+      },
+      "id": 29,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
+          "sortBy": "Last *",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.4.8",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "sum(github_views{user=\"$user\",unique=\"false\"}) by (project)",
+          "legendFormat": "{{project}}",
+          "range": true,
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          }
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "expr": "sum(github_views{unique=\"true\"}) by (project)",
+          "hide": true,
+          "instant": false,
+          "legendFormat": "{{project}} (uniq)",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "timeFrom": "60d",
+      "title": "Views",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 15
+      },
+      "id": 2,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.4.8",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "sum(github_repo_stats{user=\"$user\",stat=\"open_issues\",project=~\"$project\"}) by (project)",
+          "format": "time_series",
+          "instant": false,
+          "legendFormat": "{{project}}",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "title": "Open issues",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 7,
+        "x": 8,
+        "y": 15
+      },
+      "id": 27,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.4.8",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "expr": "sum(github_repo_stats{user=\"$user\",stat=\"open_pull_requests\",project=~\"$project\"}) by (project)",
+          "instant": false,
+          "legendFormat": "{{project}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Open pull requests",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 15,
+        "y": 15
+      },
+      "id": 22,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.4.8",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "sum(github_repo_stats{user=\"$user\",stat=\"commits\",project=~\"$project\"}) by (project)",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          }
+        }
+      ],
+      "title": "#Commits",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 23
       },
       "id": 12,
       "panels": [],
@@ -238,9 +789,10 @@
         "h": 6,
         "w": 6,
         "x": 0,
-        "y": 7
+        "y": 24
       },
       "id": 13,
+      "maxPerRow": 12,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -258,7 +810,8 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.4.3",
+      "pluginVersion": "12.4.8",
+      "repeatDirection": "h",
       "targets": [
         {
           "datasource": {
@@ -302,7 +855,71 @@
         "h": 6,
         "w": 6,
         "x": 6,
-        "y": 7
+        "y": 24
+      },
+      "id": 23,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.4.8",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "expr": "sum(github_repo_stats{project=~\"$project\",stat=\"tags\"})",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Tags",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 12,
+        "y": 24
       },
       "id": 14,
       "options": {
@@ -322,7 +939,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.4.3",
+      "pluginVersion": "12.4.8",
       "targets": [
         {
           "datasource": {
@@ -379,8 +996,8 @@
       "gridPos": {
         "h": 6,
         "w": 6,
-        "x": 12,
-        "y": 7
+        "x": 18,
+        "y": 24
       },
       "id": 15,
       "options": {
@@ -393,7 +1010,7 @@
           }
         ]
       },
-      "pluginVersion": "12.4.3",
+      "pluginVersion": "12.4.8",
       "targets": [
         {
           "editorMode": "code",
@@ -426,7 +1043,8 @@
               "pod": true,
               "project": true,
               "service": true,
-              "stat": true
+              "stat": true,
+              "user": true
             },
             "includeByName": {},
             "indexByName": {
@@ -459,7 +1077,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 13
+        "y": 30
       },
       "id": 4,
       "panels": [],
@@ -493,9 +1111,9 @@
         "h": 6,
         "w": 6,
         "x": 0,
-        "y": 14
+        "y": 31
       },
-      "id": 2,
+      "id": 25,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -513,7 +1131,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.4.3",
+      "pluginVersion": "12.4.8",
       "targets": [
         {
           "datasource": {
@@ -557,7 +1175,7 @@
         "h": 6,
         "w": 6,
         "x": 6,
-        "y": 14
+        "y": 31
       },
       "id": 1,
       "options": {
@@ -577,7 +1195,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.4.3",
+      "pluginVersion": "12.4.8",
       "targets": [
         {
           "datasource": {
@@ -621,7 +1239,7 @@
         "h": 6,
         "w": 6,
         "x": 12,
-        "y": 14
+        "y": 31
       },
       "id": 3,
       "options": {
@@ -641,7 +1259,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.4.3",
+      "pluginVersion": "12.4.8",
       "targets": [
         {
           "datasource": {
@@ -664,7 +1282,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 20
+        "y": 37
       },
       "id": 5,
       "panels": [],
@@ -698,7 +1316,7 @@
         "h": 6,
         "w": 6,
         "x": 0,
-        "y": 21
+        "y": 38
       },
       "id": 6,
       "options": {
@@ -718,7 +1336,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.4.3",
+      "pluginVersion": "12.4.8",
       "targets": [
         {
           "datasource": {
@@ -762,7 +1380,7 @@
         "h": 6,
         "w": 6,
         "x": 6,
-        "y": 21
+        "y": 38
       },
       "id": 7,
       "options": {
@@ -782,7 +1400,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.4.3",
+      "pluginVersion": "12.4.8",
       "targets": [
         {
           "datasource": {
@@ -826,7 +1444,7 @@
         "h": 6,
         "w": 6,
         "x": 12,
-        "y": 21
+        "y": 38
       },
       "id": 8,
       "options": {
@@ -846,7 +1464,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.4.3",
+      "pluginVersion": "12.4.8",
       "targets": [
         {
           "datasource": {
@@ -869,7 +1487,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 27
+        "y": 44
       },
       "id": 16,
       "panels": [],
@@ -903,7 +1521,7 @@
         "h": 6,
         "w": 6,
         "x": 0,
-        "y": 28
+        "y": 45
       },
       "id": 18,
       "options": {
@@ -923,7 +1541,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.4.3",
+      "pluginVersion": "12.4.8",
       "targets": [
         {
           "datasource": {
@@ -967,7 +1585,7 @@
         "h": 6,
         "w": 6,
         "x": 6,
-        "y": 28
+        "y": 45
       },
       "id": 19,
       "options": {
@@ -987,7 +1605,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.4.3",
+      "pluginVersion": "12.4.8",
       "targets": [
         {
           "datasource": {
@@ -1031,7 +1649,7 @@
         "h": 6,
         "w": 6,
         "x": 12,
-        "y": 28
+        "y": 45
       },
       "id": 20,
       "options": {
@@ -1051,7 +1669,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.4.3",
+      "pluginVersion": "12.4.8",
       "targets": [
         {
           "datasource": {
@@ -1095,7 +1713,7 @@
         "h": 6,
         "w": 6,
         "x": 18,
-        "y": 28
+        "y": 45
       },
       "id": 21,
       "options": {
@@ -1115,7 +1733,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.4.3",
+      "pluginVersion": "12.4.8",
       "targets": [
         {
           "datasource": {
@@ -1146,14 +1764,37 @@
           "type": "prometheus",
           "uid": "${DS_PROMETHEUS}"
         },
-        "definition": "label_values(github_repo_stats{stat=\"forks_count\"},project)",
+        "definition": "label_values(github_repo_stats{stat=\"forks_count\"},user)",
+        "label": "User",
+        "name": "user",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(github_repo_stats{stat=\"forks_count\"},user)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "regexApplyTo": "value",
+        "type": "query"
+      },
+      {
+        "allowCustomValue": false,
+        "current": {},
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(github_repo_stats{stat=\"forks_count\", user=\"$user\"},project)",
         "description": "",
+        "includeAll": true,
         "label": "Project",
+        "multi": true,
         "name": "project",
         "options": [],
         "query": {
           "qryType": 1,
-          "query": "label_values(github_repo_stats{stat=\"forks_count\"},project)",
+          "query": "label_values(github_repo_stats{stat=\"forks_count\", user=\"$user\"},project)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 1,
@@ -1165,13 +1806,13 @@
     ]
   },
   "time": {
-    "from": "now-3h",
+    "from": "now-1h",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "browser",
   "title": "Github stats",
   "uid": "adgbh58",
-  "version": 18,
+  "version": 34,
   "weekStart": ""
 }
